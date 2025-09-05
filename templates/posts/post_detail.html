@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block content %}
+<article class="prose max-w-none">
+  <h1 class="text-4xl font-extrabold text-black">{{ object.title }}</h1>
+  <p class="text-sm text-neutral-500">{{ object.created|date:'d/m/Y H:i' }}</p>
+  {% if object.cover %}<img src="{{ object.cover.url }}" alt="{{ object.title }}" class="my-6 rounded-xl"/>{% endif %}
+  <div class="leading-7 text-neutral-800">{{ object.content|linebreaks }}</div>
+</article>
+{% endblock %}

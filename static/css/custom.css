@@ -1,0 +1,9 @@
+:root{
+  --ae-orange:#f97316; /* Tailwind orange-500 */
+  --ae-black:#000000;
+  --ae-white:#ffffff;
+}
+.ae-btn{
+  display:inline-block; padding:.6rem 1rem; border-radius:.75rem;
+  background:var(--ae-orange); color:var(--ae-white); font-weight:700;
+}
