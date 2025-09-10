@@ -77,7 +77,7 @@ USE_TZ = True
 
 # ---------- Static / Media ----------
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
+STATICFILES_DIRS = [BASE_DIR / "static"]   # ΟΚ γιατί έχεις το φάκελο static/
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
@@ -102,11 +102,11 @@ STORAGES = {
     },
 }
 
-# Συμβατότητα για libs που κοιτάνε ακόμα τα «παλιά» settings
+# Συμβατότητα για libs που κοιτάνε τα «παλιά» keys
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 if USE_CLOUDINARY:
-    # Django 5 θα το αγνοήσει, αλλά αν κάποια βιβλιοθήκη το διαβάζει, δεν θα σπάσει
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 
 
 # πίσω από proxy (https)
