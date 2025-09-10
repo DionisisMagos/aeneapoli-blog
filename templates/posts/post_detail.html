@@ -5,7 +5,7 @@
 <article class="post-detail">
   <h1 class="page-title">{{ post.title }}</h1>
 
-  {% if post.cover %}
+  {% if post.cover.name %}
     <img class="cover" src="{{ post.cover.url }}" alt="{{ post.title }}">
   {% else %}
     <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">

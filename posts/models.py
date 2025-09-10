@@ -46,3 +46,15 @@ class Post(models.Model):
 
     def get_absolute_url(self):
         return reverse('posts:detail', kwargs={'slug': self.slug})
+    
+    def get_cover_url(self):
+        """
+        Επιστρέφει ασφαλώς το URL του cover ή None αν δεν υπάρχει/δεν είναι προσβάσιμο.
+        Αποφεύγει ValueError όταν λείπει το αρχείο.
+        """
+        try:
+            if self.cover and getattr(self.cover, "name", ""):
+                return self.cover.url
+        except Exception:
+            return None
+        return None
