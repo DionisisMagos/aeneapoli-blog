@@ -83,13 +83,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ---------- Django 5 STORAGES (Cloudinary) ----------
+# ---------- Cloudinary on Django 4/5 (safe) ----------
 USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
 if USE_CLOUDINARY:
     INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
 
+# ΝΕΟΣ τρόπος (Django 4.2+/5): STORAGES
 STORAGES = {
-    # Media storage:
     "default": {
         "BACKEND": (
             "cloudinary_storage.storage.MediaCloudinaryStorage"
@@ -97,11 +97,17 @@ STORAGES = {
             else "django.core.files.storage.FileSystemStorage"
         ),
     },
-    # Static storage (Whitenoise):
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# Συμβατότητα για libs που κοιτάνε ακόμα τα «παλιά» settings
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+if USE_CLOUDINARY:
+    # Django 5 θα το αγνοήσει, αλλά αν κάποια βιβλιοθήκη το διαβάζει, δεν θα σπάσει
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 
 # πίσω από proxy (https)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
