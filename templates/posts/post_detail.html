@@ -5,20 +5,22 @@
 <article class="post-detail">
   <h1 class="page-title">{{ post.title }}</h1>
 
-  {% if post.cover.name %}
-    <img class="cover" src="{{ post.cover.url }}" alt="{{ post.title }}">
-  {% else %}
-    <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
-  {% endif %}
+  {% with url=post.get_cover_url %}
+    {% if url %}
+      <img class="cover" src="{{ url }}" alt="{{ post.title }}">
+    {% else %}
+      <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
+    {% endif %}
+  {% endwith %}
 
-  {% if post.summary %}
-    <p class="summary">{{ post.summary }}</p>
+  {% if post.excerpt %}
+    <p class="summary">{{ post.excerpt }}</p>
   {% endif %}
 
   <div class="content">
-    {{ post.body|linebreaks }}
+    {{ post.content|linebreaks }}
   </div>
 
-  <p class="post-date">Δημοσιεύτηκε: {{ post.published_at|date:"d/m/Y" }}</p>
+  <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
 </article>
 {% endblock %}

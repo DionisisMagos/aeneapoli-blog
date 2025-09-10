@@ -8,16 +8,24 @@
   {% for post in page_obj %}
   <article class="post-card">
     <a href="{% url 'posts:detail' post.slug %}" class="block">
-      {% if post.cover.name %}
-        <img class="cover" src="{{ post.cover.url }}" alt="{{ post.title }}">
-      {% else %}
-        <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
-      {% endif %}
+      {% with url=post.get_cover_url %}
+        {% if url %}
+          <img class="cover" src="{{ url }}" alt="{{ post.title }}">
+        {% else %}
+          <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
+        {% endif %}
+      {% endwith %}
     </a>
+
     <h2 class="post-title">
       <a href="{% url 'posts:detail' post.slug %}">{{ post.title }}</a>
     </h2>
-    <p class="post-date">Δημοσιεύτηκε: {{ post.published_at|date:"d/m/Y" }}</p>
+
+    {% if post.excerpt %}
+      <p class="summary">{{ post.excerpt }}</p>
+    {% endif %}
+
+    <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
   </article>
   {% empty %}
   <p>Δεν υπάρχουν αναρτήσεις ακόμα.</p>
