@@ -1,10 +1,10 @@
 from pathlib import Path
-import environ
 import os
+import environ
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# .env (τοπικά) και env vars (production)
+# .env (τοπικά) + env vars (production)
 env = environ.Env(DEBUG=(bool, True))
 environ.Env.read_env(BASE_DIR / ".env")
 
@@ -12,7 +12,6 @@ SECRET_KEY = env("SECRET_KEY", default="dev-secret-key")
 DEBUG = env.bool("DEBUG", default=True)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
-# για production πίσω από reverse proxy (π.χ. Koyeb)
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=["http://127.0.0.1:8000", "http://localhost:8000", "https://*.koyeb.app"],
@@ -27,11 +26,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "posts",
 ]
-
-# Ενεργοποίηση Cloudinary ΜΟΝΟ αν υπάρχει CLOUDINARY_URL στο περιβάλλον
-if os.environ.get("CLOUDINARY_URL"):
-    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -66,10 +60,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # DB: τοπικά SQLite, σε production παίρνει DATABASE_URL (Postgres)
 DATABASES = {
-    "default": env.db(
-        "DATABASE_URL",
-        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
-    )
+    "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -84,17 +75,33 @@ TIME_ZONE = "Europe/Athens"
 USE_I18N = True
 USE_TZ = True
 
-# Static
+# ---------- Static / Media ----------
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Media: τοπικά στον δίσκο — σε production Cloudinary (αν έχει URL)
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-if env("CLOUDINARY_URL", default=None):
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+# ---------- Django 5 STORAGES (Cloudinary) ----------
+USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
+if USE_CLOUDINARY:
+    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+
+STORAGES = {
+    # Media storage:
+    "default": {
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if USE_CLOUDINARY
+            else "django.core.files.storage.FileSystemStorage"
+        ),
+    },
+    # Static storage (Whitenoise):
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # πίσω από proxy (https)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
