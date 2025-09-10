@@ -1,9 +1,24 @@
-{% extends 'base.html' %}
+{% load static %}
+{% extends "base.html" %}
+
 {% block content %}
-<article class="prose max-w-none">
-  <h1 class="text-4xl font-extrabold text-black">{{ object.title }}</h1>
-  <p class="text-sm text-neutral-500">{{ object.created|date:'d/m/Y H:i' }}</p>
-  {% if object.cover %}<img src="{{ object.cover.url }}" alt="{{ object.title }}" class="my-6 rounded-xl"/>{% endif %}
-  <div class="leading-7 text-neutral-800">{{ object.content|linebreaks }}</div>
+<article class="post-detail">
+  <h1 class="page-title">{{ post.title }}</h1>
+
+  {% if post.cover %}
+    <img class="cover" src="{{ post.cover.url }}" alt="{{ post.title }}">
+  {% else %}
+    <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
+  {% endif %}
+
+  {% if post.summary %}
+    <p class="summary">{{ post.summary }}</p>
+  {% endif %}
+
+  <div class="content">
+    {{ post.body|linebreaks }}
+  </div>
+
+  <p class="post-date">Δημοσιεύτηκε: {{ post.published_at|date:"d/m/Y" }}</p>
 </article>
 {% endblock %}

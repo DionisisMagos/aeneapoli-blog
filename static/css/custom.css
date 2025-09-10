@@ -7,3 +7,22 @@
   display:inline-block; padding:.6rem 1rem; border-radius:.75rem;
   background:var(--ae-orange); color:var(--ae-white); font-weight:700;
 }
+
+.cover{
+  width:100%;
+  aspect-ratio:16/9;
+  object-fit:cover;
+  display:block;
+  border-radius:12px;
+}
+
+.posts-grid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+@media (min-width: 900px){
+  .posts-grid{ grid-template-columns: 1fr 1fr; }
+}
+.post-title{ margin: .5rem 0 0; }
+.post-date{ color:#666; font-size:.9rem; }
