@@ -28,9 +28,10 @@ INSTALLED_APPS = [
     "posts",
 ]
 
-# Cloudinary ενεργοποιείται ΜΟΝΟ αν υπάρχει CLOUDINARY_URL
-if env("CLOUDINARY_URL", default=None):
+# Ενεργοποίηση Cloudinary ΜΟΝΟ αν υπάρχει CLOUDINARY_URL στο περιβάλλον
+if os.environ.get("CLOUDINARY_URL"):
     INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
