@@ -21,8 +21,6 @@
     {{ post.content|linebreaks }}
   </div>
 
-  {% if post.created %}
-    <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
-  {% endif %}
+  <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
 </article>
 {% endblock %}
