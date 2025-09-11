@@ -114,3 +114,20 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ---- Log errors to console so we can see them on Koyeb ----
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {"class": "logging.StreamHandler"},
+    },
+    "loggers": {
+        # 500 σφάλματα views
+        "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        # exceptions από templates
+        "django.template": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+        # cloudinary / storage
+        "cloudinary": {"handlers": ["console"], "level": "ERROR", "propagate": False},
+    },
+}
