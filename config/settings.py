@@ -87,6 +87,15 @@ MEDIA_ROOT = BASE_DIR / "media"
 USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
 if USE_CLOUDINARY:
     INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
+        "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
+        "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
+        "SECURE": True,  # δώσε πάντα https URLs
+    }
+
+    # (προαιρετικά για συμβατότητα)
+    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
 # ΝΕΟΣ τρόπος (Django 4.2+/5): STORAGES
 STORAGES = {
