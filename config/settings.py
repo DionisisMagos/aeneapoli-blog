@@ -14,7 +14,11 @@ DEBUG = env.bool("DEBUG", default=True)
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
-    default=["http://127.0.0.1:8000", "http://localhost:8000", "https://*.koyeb.app"],
+    default=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "https://*.koyeb.app",
+    ],
 )
 
 INSTALLED_APPS = [
@@ -77,72 +81,45 @@ USE_TZ = True
 
 # ---------- Static / Media ----------
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]   # ΟΚ γιατί έχεις το φάκελο static/
+STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
 # ---------- Cloudinary (Media) ----------
-USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
-if USE_CLOUDINARY:
-    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
-    CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": os.environ.get("CLOUDINARY_CLOUD_NAME"),
-        "API_KEY": os.environ.get("CLOUDINARY_API_KEY"),
-        "API_SECRET": os.environ.get("CLOUDINARY_API_SECRET"),
-        "SECURE": True,  # δώσε πάντα https URLs
-    }
-
-    # (προαιρετικά για συμβατότητα)
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
-# ---------- Cloudinary (Media) ----------
-import cloudinary
-
 CLOUDINARY_URL_ENV = os.environ.get("CLOUDINARY_URL")
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
 CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
 
 USE_CLOUDINARY = bool(
-    CLOUDINARY_URL_ENV or
-    (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+    CLOUDINARY_URL_ENV
+    or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
 )
 
 if USE_CLOUDINARY:
-    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+    # Πρόσθεσε τα apps ΜΟΝΟ αν δεν υπάρχουν ήδη (για να μην διπλασιαστούν)
+    for app in ("cloudinary", "cloudinary_storage"):
+        if app not in INSTALLED_APPS:
+            INSTALLED_APPS.append(app)
 
-    # Προτιμάμε explicit config με τα 3 κλειδιά
-    if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
-        cloudinary.config(
-            cloud_name=CLOUDINARY_CLOUD_NAME,
-            api_key=CLOUDINARY_API_KEY,
-            api_secret=CLOUDINARY_API_SECRET,
-            secure=True,
-        )
-    else:
-        # αλλιώς, αφήνουμε να διαβαστεί το CLOUDINARY_URL
-        cloudinary.config(secure=True)
-
-    # Επιλογές upload ώστε να ΜΗΝ σκάει σε διπλά ονόματα
+    # Επιλογές αποθήκευσης / upload (ασφαλή https + αποφυγή συγκρούσεων ονομάτων)
     CLOUDINARY_STORAGE = {
         "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
         "API_KEY": CLOUDINARY_API_KEY,
         "API_SECRET": CLOUDINARY_API_SECRET,
         "SECURE": True,
         "UPLOAD_OPTIONS": {
-            "folder": "aeneapoli/covers",   # βάλε ό,τι θες σαν φάκελο
-            "use_filename": True,           # κρατά το όνομα αρχείου
-            "unique_filename": True,        # προσθέτει μοναδικό suffix -> αποφεύγει σύγκρουση
-            "overwrite": False,             # (με unique_filename True δεν χρειάζεται overwrite)
+            "folder": "aeneapoli/covers",
+            "use_filename": True,
+            "unique_filename": True,
+            "overwrite": False,
             "resource_type": "image",
         },
     }
 
-
-
-# ΝΕΟΣ τρόπος (Django 4.2+/5): STORAGES
+# Νέος τρόπος (Django 4.2+/5.0)
 STORAGES = {
     "default": {
         "BACKEND": (
@@ -156,12 +133,8 @@ STORAGES = {
     },
 }
 
-# Συμβατότητα για libs που κοιτάνε τα «παλιά» keys
+# Συμβατότητα με libs που κοιτάνε ακόμα την παλιά ρύθμιση
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-if USE_CLOUDINARY:
-    DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-
-
 
 # πίσω από proxy (https)
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
@@ -169,7 +142,7 @@ USE_X_FORWARDED_HOST = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ---- Log errors to console so we can see them on Koyeb ----
+# ---- Log errors στο console (φαίνονται στο Koyeb) ----
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
@@ -177,11 +150,8 @@ LOGGING = {
         "console": {"class": "logging.StreamHandler"},
     },
     "loggers": {
-        # 500 σφάλματα views
         "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
-        # exceptions από templates
         "django.template": {"handlers": ["console"], "level": "ERROR", "propagate": False},
-        # cloudinary / storage
         "cloudinary": {"handlers": ["console"], "level": "ERROR", "propagate": False},
     },
 }
