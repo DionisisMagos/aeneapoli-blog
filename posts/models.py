@@ -1,6 +1,27 @@
+# posts/models.py
 from django.db import models
 from django.utils.text import slugify
 from django.urls import reverse
+from io import BytesIO
+from django.core.files.base import ContentFile
+from PIL import Image
+from pathlib import Path
+
+def compress_image(uploaded_file, max_size=1600, quality=85):
+    """
+    Μικραίνει & συμπιέζει την εικόνα σε JPEG.
+    Επιστρέφει ContentFile έτοιμο για αποθήκευση.
+    """
+    img = Image.open(uploaded_file)
+    # Μετατροπή σε RGB (για JPEG)
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
+    # Μείωση μεγέθους, διατηρώντας αναλογία
+    img.thumbnail((max_size, max_size), Image.LANCZOS)
+    buf = BytesIO()
+    img.save(buf, format="JPEG", optimize=True, quality=quality)
+    buf.seek(0)
+    return ContentFile(buf.getvalue())
 
 class Category(models.Model):
     name = models.CharField(max_length=80, unique=True)
@@ -42,16 +63,22 @@ class Post(models.Model):
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.title)
+        # Αν υπάρχει νέο cover, συμπίεσέ το πριν το ανεβάσουμε
+        if self.cover and hasattr(self.cover, "file"):
+            try:
+                compressed = compress_image(self.cover.file, max_size=1600, quality=85)
+                stem = Path(self.cover.name).stem or "cover"
+                # αποθηκεύουμε ως .jpg για σιγουριά
+                self.cover.save(f"{stem}.jpg", compressed, save=False)
+            except Exception:
+                # αν κάτι πάει στραβά, προχώρησε χωρίς συμπίεση
+                pass
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('posts:detail', kwargs={'slug': self.slug})
-    
+
     def get_cover_url(self):
-        """
-        Επιστρέφει ασφαλώς το URL του cover ή None αν δεν υπάρχει/δεν είναι προσβάσιμο.
-        Αποφεύγει ValueError όταν λείπει το αρχείο.
-        """
         try:
             if self.cover and getattr(self.cover, "name", ""):
                 return self.cover.url

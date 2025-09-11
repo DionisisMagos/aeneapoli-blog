@@ -97,6 +97,51 @@ if USE_CLOUDINARY:
     # (προαιρετικά για συμβατότητα)
     DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
 
+# ---------- Cloudinary (Media) ----------
+import cloudinary
+
+CLOUDINARY_URL_ENV = os.environ.get("CLOUDINARY_URL")
+CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
+
+USE_CLOUDINARY = bool(
+    CLOUDINARY_URL_ENV or
+    (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+)
+
+if USE_CLOUDINARY:
+    INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]
+
+    # Προτιμάμε explicit config με τα 3 κλειδιά
+    if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET,
+            secure=True,
+        )
+    else:
+        # αλλιώς, αφήνουμε να διαβαστεί το CLOUDINARY_URL
+        cloudinary.config(secure=True)
+
+    # Επιλογές upload ώστε να ΜΗΝ σκάει σε διπλά ονόματα
+    CLOUDINARY_STORAGE = {
+        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
+        "API_KEY": CLOUDINARY_API_KEY,
+        "API_SECRET": CLOUDINARY_API_SECRET,
+        "SECURE": True,
+        "UPLOAD_OPTIONS": {
+            "folder": "aeneapoli/covers",   # βάλε ό,τι θες σαν φάκελο
+            "use_filename": True,           # κρατά το όνομα αρχείου
+            "unique_filename": True,        # προσθέτει μοναδικό suffix -> αποφεύγει σύγκρουση
+            "overwrite": False,             # (με unique_filename True δεν χρειάζεται overwrite)
+            "resource_type": "image",
+        },
+    }
+
+
+
 # ΝΕΟΣ τρόπος (Django 4.2+/5): STORAGES
 STORAGES = {
     "default": {
