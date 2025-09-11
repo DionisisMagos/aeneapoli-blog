@@ -83,7 +83,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ---------- Cloudinary on Django 4/5 (safe) ----------
+# ---------- Cloudinary (Media) ----------
 USE_CLOUDINARY = bool(os.environ.get("CLOUDINARY_URL"))
 if USE_CLOUDINARY:
     INSTALLED_APPS += ["cloudinary", "cloudinary_storage"]

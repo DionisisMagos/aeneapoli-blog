@@ -6,7 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from django.core.files.storage import default_storage
 import os
 
-def health(_): return HttpResponse("ok")
+def health(_): 
+    return HttpResponse("ok")
 
 def storage_info(_):
     return JsonResponse({

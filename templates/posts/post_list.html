@@ -1,5 +1,5 @@
-{% load static %}
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <h1 class="page-title">Νέα Ακαδημίας</h1>
@@ -20,15 +20,12 @@
     <h2 class="post-title">
       <a href="{% url 'posts:detail' post.slug %}">{{ post.title }}</a>
     </h2>
-
-    {% if post.excerpt %}
-      <p class="summary">{{ post.excerpt }}</p>
+    {% if post.created %}
+      <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
     {% endif %}
-
-    <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
   </article>
   {% empty %}
-  <p>Δεν υπάρχουν αναρτήσεις ακόμα.</p>
+    <p>Δεν υπάρχουν αναρτήσεις ακόμα.</p>
   {% endfor %}
 </div>
 

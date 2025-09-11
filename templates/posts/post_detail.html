@@ -1,5 +1,5 @@
-{% load static %}
 {% extends "base.html" %}
+{% load static %}
 
 {% block content %}
 <article class="post-detail">
@@ -21,6 +21,8 @@
     {{ post.content|linebreaks }}
   </div>
 
-  <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
+  {% if post.created %}
+    <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
+  {% endif %}
 </article>
 {% endblock %}
