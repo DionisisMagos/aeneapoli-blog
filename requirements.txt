@@ -9,4 +9,4 @@ psycopg2-binary>=2.9
 
 # media στο cloud
 cloudinary>=1.39
-django-cloudinary-storage>=0.3
+
