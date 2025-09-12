@@ -1,6 +1,8 @@
+# config/settings.py
 from pathlib import Path
 import os
 import environ
+import cloudinary # pyright: ignore[reportMissingImports]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,7 +13,11 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("SECRET_KEY", default="dev-secret-key")
 DEBUG = env.bool("DEBUG", default=True)
 
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+# Hosts / CSRF
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["127.0.0.1", "localhost", ".koyeb.app"],
+)
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
@@ -20,6 +26,10 @@ CSRF_TRUSTED_ORIGINS = env.list(
         "https://*.koyeb.app",
     ],
 )
+# Αν μας δίνει το Koyeb public domain, πρόσθεσέ το
+KOYEB_DOMAIN = os.environ.get("KOYEB_PUBLIC_DOMAIN")
+if KOYEB_DOMAIN and KOYEB_DOMAIN not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append(KOYEB_DOMAIN)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -33,7 +43,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # static files στην παραγωγή
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -87,7 +97,7 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ---------- Cloudinary (Media) ----------
+# ---------- Cloudinary (για CloudinaryField) ----------
 CLOUDINARY_URL_ENV = os.environ.get("CLOUDINARY_URL")
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
@@ -98,42 +108,23 @@ USE_CLOUDINARY = bool(
     or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
 )
 
+if USE_CLOUDINARY and "cloudinary" not in INSTALLED_APPS:
+    INSTALLED_APPS.append("cloudinary")
+
+# Explicit config (ασφαλές https). Αν λείπουν, το SDK θα διαβάσει το CLOUDINARY_URL.
 if USE_CLOUDINARY:
-    # Πρόσθεσε τα apps ΜΟΝΟ αν δεν υπάρχουν ήδη (για να μην διπλασιαστούν)
-    for app in ("cloudinary", "cloudinary_storage"):
-        if app not in INSTALLED_APPS:
-            INSTALLED_APPS.append(app)
+    cloudinary.config(
+        cloud_name=CLOUDINARY_CLOUD_NAME,
+        api_key=CLOUDINARY_API_KEY,
+        api_secret=CLOUDINARY_API_SECRET,
+        secure=True,
+    )
 
-    # Επιλογές αποθήκευσης / upload (ασφαλή https + αποφυγή συγκρούσεων ονομάτων)
-    CLOUDINARY_STORAGE = {
-        "CLOUD_NAME": CLOUDINARY_CLOUD_NAME,
-        "API_KEY": CLOUDINARY_API_KEY,
-        "API_SECRET": CLOUDINARY_API_SECRET,
-        "SECURE": True,
-        "UPLOAD_OPTIONS": {
-            "folder": "aeneapoli/covers",
-            "use_filename": True,
-            "unique_filename": True,
-            "overwrite": False,
-            "resource_type": "image",
-        },
-    }
-
-# Νέος τρόπος (Django 4.2+/5.0)
+# Νέος τρόπος (Django 4.2+/5): default = FileSystemStorage (CloudinaryField δεν το χρειάζεται)
 STORAGES = {
-    "default": {
-        "BACKEND": (
-            "cloudinary_storage.storage.MediaCloudinaryStorage"
-            if USE_CLOUDINARY
-            else "django.core.files.storage.FileSystemStorage"
-        ),
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
-
-# Συμβατότητα με libs που κοιτάνε ακόμα την παλιά ρύθμιση
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 # πίσω από proxy (https)
@@ -146,9 +137,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
+    "handlers": {"console": {"class": "logging.StreamHandler"}},
     "loggers": {
         "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
         "django.template": {"handlers": ["console"], "level": "ERROR", "propagate": False},
