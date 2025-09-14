@@ -14,10 +14,16 @@ SECRET_KEY = env("SECRET_KEY", default="dev-secret-key")
 DEBUG = env.bool("DEBUG", default=True)
 
 # Hosts / CSRF
-ALLOWED_HOSTS = env.list(
-    "ALLOWED_HOSTS",
-    default=["127.0.0.1", "localhost", ".koyeb.app"],
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost", ".vercel.app"])
+CSRF_TRUSTED_ORIGINS = env.list(
+    "CSRF_TRUSTED_ORIGINS",
+    default=[
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "https://*.vercel.app",
+    ],
 )
+
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
