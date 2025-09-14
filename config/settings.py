@@ -2,7 +2,7 @@
 from pathlib import Path
 import os
 import environ
-import cloudinary # pyright: ignore[reportMissingImports]
+import cloudinary  # pyright: ignore[reportMissingImports]
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -13,8 +13,12 @@ environ.Env.read_env(BASE_DIR / ".env")
 SECRET_KEY = env("SECRET_KEY", default="dev-secret-key")
 DEBUG = env.bool("DEBUG", default=True)
 
-# Hosts / CSRF
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["127.0.0.1", "localhost", ".vercel.app"])
+# ---------------- Hosts / CSRF (Vercel) ----------------
+ALLOWED_HOSTS = env.list(
+    "ALLOWED_HOSTS",
+    default=["127.0.0.1", "localhost", ".vercel.app"],
+)
+
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
@@ -24,18 +28,17 @@ CSRF_TRUSTED_ORIGINS = env.list(
     ],
 )
 
-CSRF_TRUSTED_ORIGINS = env.list(
-    "CSRF_TRUSTED_ORIGINS",
-    default=[
-        "http://127.0.0.1:8000",
-        "http://localhost:8000",
-        "https://*.koyeb.app",
-    ],
-)
-# Αν μας δίνει το Koyeb public domain, πρόσθεσέ το
-KOYEB_DOMAIN = os.environ.get("KOYEB_PUBLIC_DOMAIN")
-if KOYEB_DOMAIN and KOYEB_DOMAIN not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append(KOYEB_DOMAIN)
+# Προσθήκη δυναμικού Vercel URL (π.χ. my-app.vercel.app)
+VERCEL_URL = os.environ.get("VERCEL_URL")
+if VERCEL_URL:
+    host = VERCEL_URL.split("://")[-1]
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
+    origin = f"https://{host}"
+    if origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(origin)
+
+# -------------------------------------------------------
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -78,11 +81,13 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-# DB: τοπικά SQLite, σε production παίρνει DATABASE_URL (Postgres)
+# ---------------- Database ----------------
+# Σε production βάλε στο Vercel env: DATABASE_URL=postgres://... (Supabase, με ?sslmode=require)
 DATABASES = {
     "default": env.db("DATABASE_URL", default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}")
 }
 
+# ---------------- Auth ----------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -95,7 +100,7 @@ TIME_ZONE = "Europe/Athens"
 USE_I18N = True
 USE_TZ = True
 
-# ---------- Static / Media ----------
+# ---------------- Static / Media ----------------
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -103,30 +108,32 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# ---------- Cloudinary (για CloudinaryField) ----------
+# ---------------- Cloudinary (για CloudinaryField) ----------------
 CLOUDINARY_URL_ENV = os.environ.get("CLOUDINARY_URL")
 CLOUDINARY_CLOUD_NAME = os.environ.get("CLOUDINARY_CLOUD_NAME")
 CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
 CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
 
 USE_CLOUDINARY = bool(
-    CLOUDINARY_URL_ENV
-    or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
+    CLOUDINARY_URL_ENV or (CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET)
 )
 
 if USE_CLOUDINARY and "cloudinary" not in INSTALLED_APPS:
     INSTALLED_APPS.append("cloudinary")
 
-# Explicit config (ασφαλές https). Αν λείπουν, το SDK θα διαβάσει το CLOUDINARY_URL.
 if USE_CLOUDINARY:
-    cloudinary.config(
-        cloud_name=CLOUDINARY_CLOUD_NAME,
-        api_key=CLOUDINARY_API_KEY,
-        api_secret=CLOUDINARY_API_SECRET,
-        secure=True,
-    )
+    # Αν έχουμε και τα 3 keys → ρύθμιση explicit, αλλιώς διάβασε από CLOUDINARY_URL
+    if CLOUDINARY_CLOUD_NAME and CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET:
+        cloudinary.config(
+            cloud_name=CLOUDINARY_CLOUD_NAME,
+            api_key=CLOUDINARY_API_KEY,
+            api_secret=CLOUDINARY_API_SECRET,
+            secure=True,
+        )
+    else:
+        cloudinary.config(secure=True)
 
-# Νέος τρόπος (Django 4.2+/5): default = FileSystemStorage (CloudinaryField δεν το χρειάζεται)
+# ---------------- Storages (Django 4.2+/5) ----------------
 STORAGES = {
     "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
@@ -139,7 +146,7 @@ USE_X_FORWARDED_HOST = True
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ---- Log errors στο console (φαίνονται στο Koyeb) ----
+# ---------------- Logging (φαίνονται στο Vercel) ----------------
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
