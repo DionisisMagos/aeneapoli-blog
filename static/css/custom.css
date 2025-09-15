@@ -26,3 +26,22 @@
 }
 .post-title{ margin: .5rem 0 0; }
 .post-date{ color:#666; font-size:.9rem; }
+
+/* Full-page background image (σεταρισμένο εκτός inline) */
+.site-bg {
+  min-height: 100vh;
+  background-image: url("/static/img/bg.jpg"); /* Βάλε την εικόνα σου στο static/img/bg.jpg */
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Διακριτικό πέπλο πάνω από το background (προαιρετικό) */
+.site-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.08); /* άλλαξε την ένταση αν θέλεις */
+  pointer-events: none;
+}

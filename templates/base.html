@@ -8,8 +8,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   </head>
-  <body class="bg-white text-neutral-900">
-    <header class="border-b border-neutral-200">
+
+  <body class="site-bg text-neutral-900">
+    <header class="border-b border-neutral-200 bg-white/85 backdrop-blur-sm">
       <div class="max-w-6xl mx-auto px-4 py-6">
         <div class="flex items-center gap-4 md:gap-6">
           <img src="{% static 'img/aeneapoli-logo.jpg' %}"
@@ -32,11 +33,11 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 min-h-[70vh]">
+    <main class="max-w-6xl mx-auto px-4 py-8 min-h-[70vh] bg-white/85 backdrop-blur-sm rounded-2xl shadow-sm">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-black text-white">
+    <footer class="bg-black/90 text-white">
       <div class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
         <p class="text-sm">© {{ now|date:'Y' }} Α.Ε. ΝΕΑΠΟΛΗΣ ACADEMIES</p>
         <a href="/social/" class="text-sm text-orange-400 hover:text-orange-300">Ακολούθησέ μας</a>
