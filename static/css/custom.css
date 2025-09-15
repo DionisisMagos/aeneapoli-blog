@@ -1,15 +1,16 @@
 :root{
-  --ae-orange:#f97316; /* Tailwind orange-500 */
+  --ae-orange:#f97316;
   --ae-black:#000000;
   --ae-white:#ffffff;
 }
 
+/* Buttons */
 .ae-btn{
   display:inline-block; padding:.6rem 1rem; border-radius:.75rem;
   background:var(--ae-orange); color:var(--ae-white); font-weight:700;
 }
 
-/* --- Κάρτες/εικόνες posts --- */
+/* Κάρτες/εικόνες posts */
 .cover{
   width:100%;
   aspect-ratio:16/9;
@@ -26,86 +27,66 @@
 @media (min-width: 900px){
   .posts-grid{ grid-template-columns: 1fr 1fr; }
 }
-.post-title{ margin: .5rem 0 0; }
+.post-title{ margin:.5rem 0 0; }
 .post-date{ color:#666; font-size:.9rem; }
 
-/* --- Full-page background image --- */
+/* === Full-page background === */
 .site-bg{
-  min-height: 100vh;
-  background-image: url("/static/img/bg.png"); /* Βάλε την εικόνα σου εδώ */
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
+  min-height:100vh;
+  background-image:url("/static/img/bg.png");
+  background-position:center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
 }
-
-/* Διακριτικό πέπλο πάνω από το φόντο */
 .site-bg::before{
   content:"";
-  position: fixed;
-  inset: 0;
-  background: rgba(255,255,255,0.08); /* άλλαξε ένταση αν θες */
-  pointer-events: none;
+  position:fixed; inset:0;
+  background:rgba(255,255,255,0.06); /* λεπτό πέπλο */
+  pointer-events:none;
 }
 
-/* ===========================
-   Glass Header + Responsive
-   =========================== */
-
-/* “Γυάλινο” header */
+/* === Glass Header === */
 .glass-header{
-  background: rgba(255,255,255,.55);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(0,0,0,.08);
-  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+  background:rgba(255,255,255,.48);
+  backdrop-filter:saturate(140%) blur(10px);
+  -webkit-backdrop-filter:saturate(140%) blur(10px);
+  border-bottom:1px solid rgba(0,0,0,.06);
+  box-shadow:0 2px 16px rgba(0,0,0,.06);
 }
 
-/* Logo: να “δένει” με το φόντο & να είναι responsive */
+/* Logo: κάνε «αόρατο» το λευκό κουτί (χωρίς να πειράξουμε το αρχείο) */
 .logo-img{
-  mix-blend-mode: multiply;            /* μειώνει το άσπρο “κουτί” */
-  height: clamp(56px, 10vw, 112px);    /* responsive ύψος */
-  width: auto;
-  display: block;
+  height:clamp(56px, 10vw, 112px);
+  width:auto;
+  display:block;
+  /* Το κόλπο: το white background του PNG “χάνεται” πάνω στο φόντο */
+  mix-blend-mode:darken;          /* δοκίμασε και multiply αν θες */
+  image-rendering:-webkit-optimize-contrast;
 }
 
-/* Τίτλος: responsive */
+/* Τίτλος responsive */
 .site-title{
-  font-size: clamp(28px, 4.2vw, 76px);
-  line-height: 1.05;
-  letter-spacing: .01em;
+  font-size:clamp(28px, 4.2vw, 76px);
+  line-height:1.05;
+  letter-spacing:.01em;
 }
-
-/* Καλύτερο σπάσιμο τίτλου σε πολύ μικρές οθόνες */
-@media (max-width: 420px){
+@media (max-width:420px){
   .site-title span:last-child{ display:block; }
 }
 
-/* Πιο άνετο navigation σε κινητά */
-@media (max-width: 640px){
-  nav a{ padding: 2px 0; display:inline-block; }
+/* Navigation πιο άνετο σε κινητά */
+@media (max-width:640px){
+  nav a{ padding:2px 0; display:inline-block; }
 }
 
-/* --- Γυάλινο πάνελ για το περιεχόμενο --- */
+/* Περιεχόμενο σε glass panel */
 .content-glass{
-  background: rgba(255,255,255,0.68);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
-  border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 18px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
-  margin-top: 16px;   /* μικρό κενό κάτω από το header */
-}
-
-/* Αν το logo είναι PNG με διαφάνεια, ας γίνει πιο «καθαρό» */
-.logo-img{
-  height: clamp(56px, 10vw, 112px);
-  width: auto;
-  display: block;
-  image-rendering: -webkit-optimize-contrast;
-}
-
-/* προαιρετικά, μικρή μείωση της έντασης του πέπλου επάνω από το φόντο */
-.site-bg::before{
-  background: rgba(255,255,255,0.05);
+  background:rgba(255,255,255,0.68);
+  backdrop-filter:blur(6px);
+  -webkit-backdrop-filter:blur(6px);
+  border:1px solid rgba(0,0,0,0.06);
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.10);
+  margin-top:16px;
 }

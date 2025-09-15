@@ -7,36 +7,36 @@
     <title>Α.Ε. ΝΕΑΠΟΛΗΣ ACADEMIES</title>
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+    <!-- cache-buster για να φορτώνει σίγουρα το νέο CSS -->
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}?v=3">
   </head>
   <body class="text-neutral-900 site-bg">
 
     <!-- HEADER -->
-<header class="glass-header sticky top-0 z-50 border-b border-neutral-200/60">
-  <div class="max-w-6xl mx-auto px-4 py-6">
-    <div class="flex items-center gap-4 md:gap-6">
-      <img
-        src="{% static 'img/aeneapoli-logo.png' %}"
-        alt="Α.Ε. ΝΕΑΠΟΛΗΣ"
-        class="logo-img h-16 md:h-20 lg:h-24 w-auto shrink-0"
-      />
-      <h1 class="site-title font-extrabold tracking-wide leading-none">
-        <span class="text-black">Α.Ε.</span>
-        <span class="text-black">ΝΕΑΠΟΛΗΣ</span>
-        <span class="text-orange-800">ACADEMIES</span>
-      </h1>
-    </div>
+    <header class="glass-header sticky top-0 z-50">
+      <div class="max-w-6xl mx-auto px-4 py-6">
+        <div class="flex items-center gap-4 md:gap-6">
+          <img
+            src="{% static 'img/aeneapoli-logo.png' %}"
+            alt="Α.Ε. ΝΕΑΠΟΛΗΣ"
+            class="logo-img h-16 md:h-20 lg:h-24 w-auto shrink-0"
+          />
+          <h1 class="site-title font-extrabold tracking-wide leading-none">
+            <span class="text-black">Α.Ε.</span>
+            <span class="text-black">ΝΕΑΠΟΛΗΣ</span>
+            <span class="text-orange-800">ACADEMIES</span>
+          </h1>
+        </div>
 
-    <nav class="mt-4 flex gap-4 flex-wrap text-sm">
-      <a href="{% url 'posts:list' %}" class="hover:text-orange-600">Αρχική</a>
-      <a href="/about/" class="hover:text-orange-600">Σχετικά</a>
-      <a href="/contact/" class="hover:text-orange-600">Επικοινωνία</a>
-      <a href="/social/" class="hover:text-orange-600">Social</a>
-      {% if user.is_staff %}<a href="/admin/" class="hover:text-orange-600">Admin</a>{% endif %}
-    </nav>
-  </div>
-</header>
-
+        <nav class="mt-4 flex gap-4 flex-wrap text-sm">
+          <a href="{% url 'posts:list' %}" class="hover:text-orange-600">Αρχική</a>
+          <a href="/about/" class="hover:text-orange-600">Σχετικά</a>
+          <a href="/contact/" class="hover:text-orange-600">Επικοινωνία</a>
+          <a href="/social/" class="hover:text-orange-600">Social</a>
+          {% if user.is_staff %}<a href="/admin/" class="hover:text-orange-600">Admin</a>{% endif %}
+        </nav>
+      </div>
+    </header>
 
     <main class="content-glass max-w-6xl mx-auto px-4 py-8 min-h-[70vh]">
       {% block content %}{% endblock %}
