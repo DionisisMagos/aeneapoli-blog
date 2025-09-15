@@ -48,22 +48,27 @@
 
 /* === Glass Header === */
 .glass-header{
-  background:rgba(255,255,255,.48);
-  backdrop-filter:saturate(140%) blur(10px);
-  -webkit-backdrop-filter:saturate(140%) blur(10px);
+  background:rgba(255,255,255,.50);
+  backdrop-filter:saturate(140%) blur(12px);
+  -webkit-backdrop-filter:saturate(140%) blur(12px);
   border-bottom:1px solid rgba(0,0,0,.06);
   box-shadow:0 2px 16px rgba(0,0,0,.06);
+  isolation:isolate; /* για να δουλεύει σωστά το blend του logo μέσα στο header */
 }
+
+/* λίγο πιο “κομμένο” σε μικρές οθόνες ώστε να μην είναι ψηλό */
+@media (max-width:640px){
+  .glass-header > .max-w-6xl{ padding-top:.75rem; padding-bottom:.5rem; }
+}
+
 
 /* Logo: κάνε «αόρατο» το λευκό κουτί (χωρίς να πειράξουμε το αρχείο) */
 .logo-img{
   height:clamp(56px, 10vw, 112px);
   width:auto;
   display:block;
-  /* Το κόλπο: το white background του PNG “χάνεται” πάνω στο φόντο */
-  mix-blend-mode:darken;          /* δοκίμασε και multiply αν θες */
-  image-rendering:-webkit-optimize-contrast;
 }
+
 
 /* Τίτλος responsive */
 .site-title{
