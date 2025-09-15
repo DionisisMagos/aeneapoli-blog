@@ -5,17 +5,24 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Α.Ε. ΝΕΑΠΟΛΗΣ ACADEMIES</title>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="{% static 'css/custom.css' %}">
   </head>
+  <body class="bg-white text-neutral-900">
 
-  <body class="site-bg text-neutral-900">
-    <header class="border-b border-neutral-200 bg-white/85 backdrop-blur-sm">
+    <!-- HEADER -->
+    <header class="sticky top-0 z-50 border-b border-neutral-200/60 bg-white/60 backdrop-blur-md">
       <div class="max-w-6xl mx-auto px-4 py-6">
         <div class="flex items-center gap-4 md:gap-6">
-          <img src="{% static 'img/aeneapoli-logo.jpg' %}"
-               alt="Α.Ε. ΝΕΑΠΟΛΗΣ"
-               class="h-16 md:h-20 lg:h-24 xl:h-56 w-auto shrink-0">
+
+          <!-- Αν ετοιμάσεις PNG με διαφάνεια, άλλαξε το .jpg σε .png -->
+          <img
+            src="{% static 'img/aeneapoli-logo.jpg' %}"
+            alt="Α.Ε. ΝΕΑΠΟΛΗΣ"
+            class="h-16 md:h-20 lg:h-24 w-auto shrink-0 mix-blend-multiply"
+          />
+
           <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-wide leading-none">
             <span class="text-black">Α.Ε.</span>
             <span class="text-black">ΝΕΑΠΟΛΗΣ</span>
@@ -33,11 +40,13 @@
       </div>
     </header>
 
-    <main class="max-w-6xl mx-auto px-4 py-8 min-h-[70vh] bg-white/85 backdrop-blur-sm rounded-2xl shadow-sm">
+    <!-- CONTENT -->
+    <main class="max-w-6xl mx-auto px-4 py-8 min-h-[70vh]">
       {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-black/90 text-white">
+    <!-- FOOTER -->
+    <footer class="bg-black text-white">
       <div class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
         <p class="text-sm">© {{ now|date:'Y' }} Α.Ε. ΝΕΑΠΟΛΗΣ ACADEMIES</p>
         <a href="/social/" class="text-sm text-orange-400 hover:text-orange-300">Ακολούθησέ μας</a>
