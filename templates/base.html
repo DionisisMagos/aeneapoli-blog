@@ -18,7 +18,7 @@
       <img
         src="{% static 'img/aeneapoli-logo.png' %}"
         alt="Α.Ε. ΝΕΑΠΟΛΗΣ"
-        class="logo-img h-16 md:h-20 lg:h-24 w-auto shrink-0 mix-blend-multiply"
+        class="logo-img h-16 md:h-20 lg:h-24 w-auto shrink-0"
       />
       <h1 class="site-title font-extrabold tracking-wide leading-none">
         <span class="text-black">Α.Ε.</span>
@@ -38,12 +38,10 @@
 </header>
 
 
-    <!-- CONTENT -->
-    <main class="max-w-6xl mx-auto px-4 py-8 min-h-[70vh]">
+    <main class="content-glass max-w-6xl mx-auto px-4 py-8 min-h-[70vh]">
       {% block content %}{% endblock %}
     </main>
 
-    <!-- FOOTER -->
     <footer class="bg-black text-white">
       <div class="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between">
         <p class="text-sm">© {{ now|date:'Y' }} Α.Ε. ΝΕΑΠΟΛΗΣ ACADEMIES</p>

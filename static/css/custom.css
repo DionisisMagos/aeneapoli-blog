@@ -85,3 +85,27 @@
 @media (max-width: 640px){
   nav a{ padding: 2px 0; display:inline-block; }
 }
+
+/* --- Γυάλινο πάνελ για το περιεχόμενο --- */
+.content-glass{
+  background: rgba(255,255,255,0.68);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: 18px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.10);
+  margin-top: 16px;   /* μικρό κενό κάτω από το header */
+}
+
+/* Αν το logo είναι PNG με διαφάνεια, ας γίνει πιο «καθαρό» */
+.logo-img{
+  height: clamp(56px, 10vw, 112px);
+  width: auto;
+  display: block;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* προαιρετικά, μικρή μείωση της έντασης του πέπλου επάνω από το φόντο */
+.site-bg::before{
+  background: rgba(255,255,255,0.05);
+}
