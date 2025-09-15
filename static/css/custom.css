@@ -3,11 +3,13 @@
   --ae-black:#000000;
   --ae-white:#ffffff;
 }
+
 .ae-btn{
   display:inline-block; padding:.6rem 1rem; border-radius:.75rem;
   background:var(--ae-orange); color:var(--ae-white); font-weight:700;
 }
 
+/* --- Κάρτες/εικόνες posts --- */
 .cover{
   width:100%;
   aspect-ratio:16/9;
@@ -27,21 +29,59 @@
 .post-title{ margin: .5rem 0 0; }
 .post-date{ color:#666; font-size:.9rem; }
 
-/* Full-page background image (σεταρισμένο εκτός inline) */
-.site-bg {
+/* --- Full-page background image --- */
+.site-bg{
   min-height: 100vh;
-  background-image: url("/static/img/bg.jpg"); /* Βάλε την εικόνα σου στο static/img/bg.jpg */
+  background-image: url("/static/img/bg.png"); /* Βάλε την εικόνα σου εδώ */
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
 }
 
-/* Διακριτικό πέπλο πάνω από το background (προαιρετικό) */
-.site-bg::before {
-  content: "";
+/* Διακριτικό πέπλο πάνω από το φόντο */
+.site-bg::before{
+  content:"";
   position: fixed;
   inset: 0;
-  background: rgba(255, 255, 255, 0.08); /* άλλαξε την ένταση αν θέλεις */
+  background: rgba(255,255,255,0.08); /* άλλαξε ένταση αν θες */
   pointer-events: none;
+}
+
+/* ===========================
+   Glass Header + Responsive
+   =========================== */
+
+/* “Γυάλινο” header */
+.glass-header{
+  background: rgba(255,255,255,.55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 2px 16px rgba(0,0,0,.06);
+}
+
+/* Logo: να “δένει” με το φόντο & να είναι responsive */
+.logo-img{
+  mix-blend-mode: multiply;            /* μειώνει το άσπρο “κουτί” */
+  height: clamp(56px, 10vw, 112px);    /* responsive ύψος */
+  width: auto;
+  display: block;
+}
+
+/* Τίτλος: responsive */
+.site-title{
+  font-size: clamp(28px, 4.2vw, 76px);
+  line-height: 1.05;
+  letter-spacing: .01em;
+}
+
+/* Καλύτερο σπάσιμο τίτλου σε πολύ μικρές οθόνες */
+@media (max-width: 420px){
+  .site-title span:last-child{ display:block; }
+}
+
+/* Πιο άνετο navigation σε κινητά */
+@media (max-width: 640px){
+  nav a{ padding: 2px 0; display:inline-block; }
 }
