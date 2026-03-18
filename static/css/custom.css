@@ -64,15 +64,15 @@
 
 /* Logo: κάνε «αόρατο» το λευκό κουτί (χωρίς να πειράξουμε το αρχείο) */
 .logo-img{
-  height:clamp(80px, 12vw, 160px);
-  width:auto;
+  height: fit-content;
+  width:fit-content;
   display:block;
 }
 
 
 /* Τίτλος responsive */
 .site-title{
-  font-size:clamp(28px, 4.2vw, 76px);
+  font-size:40px;
   line-height:1.05;
   letter-spacing:.01em;
 }
