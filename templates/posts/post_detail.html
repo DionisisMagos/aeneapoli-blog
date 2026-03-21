@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<article class="post-detail">
+  <h1 class="page-title">{{ post.title }}</h1>
+
+  {% with url=post.get_cover_url %}
+    {% if url %}
+      <img class="cover" src="{{ url }}" alt="{{ post.title }}">
+    {% else %}
+      <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
+    {% endif %}
+  {% endwith %}
+
+  {% if post.excerpt %}
+    <p class="summary">{{ post.excerpt }}</p>
+  {% endif %}
+
+  <div class="content">
+    {{ post.content|linebreaks }}
+  </div>
+
+  <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
+</article>
+{% endblock %}

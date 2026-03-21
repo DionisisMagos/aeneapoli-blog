@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h1 class="page-title">Νέα Ακαδημίας</h1>
+
+<div class="posts-grid">
+  {% for post in page_obj %}
+  <article class="post-card">
+    <a href="{% url 'posts:detail' post.slug %}" class="block">
+      {% with url=post.get_cover_url %}
+        {% if url %}
+          <img class="cover" src="{{ url }}" alt="{{ post.title }}">
+        {% else %}
+          <img class="cover" src="{% static 'img/aeneapoli-logo.jpg' %}" alt="{{ post.title }}">
+        {% endif %}
+      {% endwith %}
+    </a>
+    <h2 class="post-title">
+      <a href="{% url 'posts:detail' post.slug %}">{{ post.title }}</a>
+    </h2>
+    <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
+  </article>
+  {% empty %}
+  <p>Δεν υπάρχουν αναρτήσεις ακόμα.</p>
+  {% endfor %}
+</div>
+
+<div class="pagination">
+  {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}">← Προηγούμενη</a>
+  {% endif %}
+  <span>Σελίδα {{ page_obj.number }} από {{ page_obj.paginator.num_pages }}</span>
+  {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}">Επόμενη →</a>
+  {% endif %}
+</div>
+{% endblock %}

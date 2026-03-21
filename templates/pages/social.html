@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-3xl font-bold mb-4 text-black">Ακολούθησέ μας</h1>
+<ul class="space-y-2">
+  <li><a href="https://www.instagram.com/neapoli_1999/" target="_blank" rel="noopener" class="text-orange-600 underline hover:no-underline">Instagram</a></li>
+  {% for name, url in links.items %}
+    <li><a href="{{ url }}" target="_blank" rel="noopener" class="text-orange-600 underline hover:no-underline">{{ name|title }}</a></li>
+  {% empty %}
+    <li>Δεν έχουν οριστεί ακόμα social links.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
