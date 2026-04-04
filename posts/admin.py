@@ -14,9 +14,10 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 20
+    extra = 0  # Απενεργοποιήθηκε για να αποφευχθεί το payload limit
     max_num = 30
     fields = ('image', 'caption')
+    readonly_fields = ('image',)  # Μόνο για προβολή, όχι για edit
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
