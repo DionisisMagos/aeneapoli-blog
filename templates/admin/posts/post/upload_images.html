@@ -1,0 +1,164 @@
+{% extends "admin/base_site.html" %}
+{% load static i18n %}
+
+{% block title %}{% trans "Upload images to" %} {{ post.title }}{% endblock %}
+
+{% block content %}
+  <div class="module" style="max-width: 960px;">
+    <h1>{% trans "Upload images for" %} “{{ post.title }}”</h1>
+
+    {% if not cloudinary_cloud_name %}
+      <div class="errornote">
+        <p>{% trans "Cloudinary is not configured. Please set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET." %}</p>
+      </div>
+    {% endif %}
+
+    <div class="form-row">
+      <label for="upload-files" class="required">{% trans "Select image files" %}</label><br>
+      <input id="upload-files" type="file" accept="image/*" multiple style="margin-top: 0.5rem; width: 100%;" {% if not cloudinary_cloud_name %}disabled{% endif %}>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <button id="upload-button" class="default" {% if not cloudinary_cloud_name %}disabled{% endif %}>{% trans "Upload to Cloudinary" %}</button>
+      <button id="save-button" class="default" disabled>{% trans "Save images to post" %}</button>
+      <a href="{{ post_admin_url }}" class="button cancel-link" style="margin-left: 1rem;">{% trans "Back to post" %}</a>
+    </div>
+
+    <div id="messages" style="margin-top: 1rem;"></div>
+    <ul id="uploaded-list" style="margin-top: 1rem; list-style: none; padding: 0;"></ul>
+  </div>
+
+  <script>
+    const cloudName = '{{ cloudinary_cloud_name|default:'' }}';
+    const signatureUrl = '{{ signature_url }}';
+    const saveUrl = '{{ save_url }}';
+    const postAdminUrl = '{{ post_admin_url }}';
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    const uploadButton = document.getElementById('upload-button');
+    const saveButton = document.getElementById('save-button');
+    const fileInput = document.getElementById('upload-files');
+    const messages = document.getElementById('messages');
+    const uploadedList = document.getElementById('uploaded-list');
+    let uploadedImages = [];
+
+    function appendMessage(text, isError=false) {
+      const item = document.createElement('div');
+      item.textContent = text;
+      item.style.marginBottom = '0.5rem';
+      if (isError) {
+        item.style.color = '#b00';
+      }
+      messages.appendChild(item);
+    }
+
+    async function fetchSignature() {
+      const response = await fetch(signatureUrl, { credentials: 'same-origin' });
+      return response.json();
+    }
+
+    async function uploadFile(file) {
+      const signData = await fetchSignature();
+      if (!signData.ok) {
+        throw new Error(signData.error || 'Signature error');
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('api_key', signData.api_key);
+      formData.append('timestamp', signData.timestamp);
+      formData.append('signature', signData.signature);
+      formData.append('folder', 'aeneapoli/gallery');
+
+      const uploadEndpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+      const res = await fetch(uploadEndpoint, { method: 'POST', body: formData });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        const errorMsg = body.error?.message || body.error || res.statusText;
+        throw new Error(errorMsg || 'Cloudinary upload failed');
+      }
+      return res.json();
+    }
+
+    uploadButton.addEventListener('click', async () => {
+      messages.innerHTML = '';
+      uploadedList.innerHTML = '';
+      uploadedImages = [];
+
+      const files = Array.from(fileInput.files || []);
+      if (!files.length) {
+        appendMessage('{% trans "Please choose at least one image file." %}', true);
+        return;
+      }
+
+      uploadButton.disabled = true;
+      saveButton.disabled = true;
+
+      for (const file of files) {
+        const item = document.createElement('li');
+        item.textContent = `{% trans "Uploading" %} ${file.name}...`;
+        uploadedList.appendChild(item);
+
+        try {
+          const result = await uploadFile(file);
+          uploadedImages.push({ public_id: result.public_id, caption: '' });
+          item.textContent = `${file.name} - {% trans "uploaded" %}`;
+        } catch (error) {
+          item.textContent = `${file.name} - {% trans "error" %}: ${error.message}`;
+          item.style.color = '#b00';
+          appendMessage(`${file.name}: ${error.message}`, true);
+        }
+      }
+
+      if (uploadedImages.length > 0) {
+        saveButton.disabled = false;
+        appendMessage(`{% trans "Uploaded" %} ${uploadedImages.length} {% trans "images." %}`);
+      }
+      uploadButton.disabled = false;
+    });
+
+    saveButton.addEventListener('click', async () => {
+      if (!uploadedImages.length) {
+        appendMessage('{% trans "No uploaded images available." %}', true);
+        return;
+      }
+
+      saveButton.disabled = true;
+      appendMessage('{% trans "Saving images to post..." %}');
+
+      const csrftoken = getCookie('csrftoken');
+      const response = await fetch(saveUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ images: uploadedImages }),
+        credentials: 'same-origin',
+      });
+      const data = await response.json();
+      if (!response.ok || !data.ok) {
+        appendMessage(data.error || '{% trans "Save failed." %}', true);
+        saveButton.disabled = false;
+        return;
+      }
+
+      appendMessage(`{% trans "Successfully saved" %} ${data.created} {% trans "images." %}`);
+      window.location.href = postAdminUrl;
+    });
+  </script>
+{% endblock %}
