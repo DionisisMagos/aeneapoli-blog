@@ -21,6 +21,22 @@
     {{ post.content|linebreaks }}
   </div>
 
+  {% if post.images.exists %}
+  <section class="post-gallery">
+    <h2>Φωτογραφίες</h2>
+    <div class="gallery-grid">
+      {% for image in post.images.all %}
+        <figure>
+          <img src="{{ image.image.url }}" alt="{{ image.caption|default:post.title }}">
+          {% if image.caption %}
+            <figcaption>{{ image.caption }}</figcaption>
+          {% endif %}
+        </figure>
+      {% endfor %}
+    </div>
+  </section>
+  {% endif %}
+
   <p class="post-date">Δημοσιεύτηκε: {{ post.created|date:"d/m/Y" }}</p>
 </article>
 {% endblock %}

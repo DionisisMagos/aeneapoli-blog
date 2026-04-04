@@ -68,3 +68,27 @@ class Post(models.Model):
             return self.cover.url if self.cover else None
         except Exception:
             return None
+
+
+class PostImage(models.Model):
+    post = models.ForeignKey(
+        Post,
+        on_delete=models.CASCADE,
+        related_name="images",
+    )
+    image = CloudinaryField(
+        'image',
+        folder='aeneapoli/gallery',
+        null=False,
+        blank=False,
+        overwrite=False,
+        resource_type='image',
+    )
+    caption = models.CharField(max_length=200, blank=True)
+
+    class Meta:
+        verbose_name = 'Εικόνα άρθρου'
+        verbose_name_plural = 'Εικόνες άρθρου'
+
+    def __str__(self):
+        return f"Image for {self.post.title}"
