@@ -3,7 +3,7 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 1
+    extra = 20
     max_num = 30
     fields = ('image', 'caption')
 
