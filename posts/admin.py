@@ -29,7 +29,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('published', 'categories', 'created')
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
-    inlines = (PostImageInline,)
+    inlines = ()  # Κανένα inline - όλα γίνονται στο Upload images
     change_form_template = 'admin/posts/post/change_form.html'
 
     def get_urls(self):
@@ -39,6 +39,11 @@ class PostAdmin(admin.ModelAdmin):
                 '<path:object_id>/upload-images/',
                 self.admin_site.admin_view(self.upload_images_view),
                 name='posts_post_upload_images',
+            ),
+            path(
+                '<path:object_id>/upload-images/delete/',
+                self.admin_site.admin_view(self.delete_image),
+                name='posts_post_delete_image',
             ),
             path(
                 '<path:object_id>/upload-signature/',
@@ -92,6 +97,26 @@ class PostAdmin(admin.ModelAdmin):
                 'post_admin_url': reverse('admin:posts_post_change', args=[object_id]),
             },
         )
+
+    def delete_image(self, request, object_id):
+        if request.method != 'POST':
+            return JsonResponse({'ok': False, 'error': 'Only POST allowed'}, status=400)
+
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+
+        image_id = data.get('image_id')
+        if not image_id:
+            return JsonResponse({'ok': False, 'error': 'No image_id provided'}, status=400)
+
+        try:
+            image = PostImage.objects.get(pk=image_id, post_id=object_id)
+            image.delete()
+            return JsonResponse({'ok': True, 'message': 'Image deleted'})
+        except PostImage.DoesNotExist:
+            return JsonResponse({'ok': False, 'error': 'Image not found'}, status=404)
 
     def upload_signature(self, request, object_id):
         if request.method != 'GET':

@@ -5,12 +5,27 @@
 
 {% block content %}
   <div class="module" style="max-width: 960px;">
-    <h1>{% trans "Upload images for" %} “{{ post.title }}”</h1>
+    <h1>{% trans "Upload images for" %} "{{ post.title }}"</h1>
 
     {% if not cloudinary_cloud_name %}
       <div class="errornote">
         <p>{% trans "Cloudinary is not configured. Please set CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME / CLOUDINARY_API_KEY / CLOUDINARY_API_SECRET." %}</p>
       </div>
+    {% endif %}
+
+    <!-- Existing images -->
+    {% if post.images.exists %}
+    <div style="margin-bottom: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+      <h2>{% trans "Current images" %} ({{ post.images.count }})</h2>
+      <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        {% for image in post.images.all %}
+          <div style="position: relative; border-radius: 8px; overflow: hidden;">
+            <img src="{{ image.image.url }}" style="width: 100%; height: 150px; object-fit: cover;">
+            <button type="button" class="delete-image-btn" data-image-id="{{ image.id }}" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 18px; padding: 0;">×</button>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
     {% endif %}
 
     <div class="form-row">
@@ -94,6 +109,33 @@
       return res.json();
     }
 
+    // Delete existing image
+    document.querySelectorAll('.delete-image-btn').forEach(btn => {
+      btn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!confirm('Are you sure?')) return;
+        
+        const imageId = btn.dataset.imageId;
+        const csrftoken = getCookie('csrftoken');
+        const response = await fetch(saveUrl + 'delete/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken,
+          },
+          body: JSON.stringify({ image_id: imageId }),
+          credentials: 'same-origin',
+        });
+        const data = await response.json();
+        if (data.ok) {
+          btn.closest('div').remove();
+          appendMessage('Image deleted');
+        } else {
+          appendMessage(data.error || 'Delete failed', true);
+        }
+      });
+    });
+
     uploadButton.addEventListener('click', async () => {
       messages.innerHTML = '';
       uploadedList.innerHTML = '';
@@ -101,7 +143,7 @@
 
       const files = Array.from(fileInput.files || []);
       if (!files.length) {
-        appendMessage('{% trans "Please choose at least one image file." %}', true);
+        appendMessage('Please choose at least one image file.', true);
         return;
       }
 
@@ -110,15 +152,15 @@
 
       for (const file of files) {
         const item = document.createElement('li');
-        item.textContent = `{% trans "Uploading" %} ${file.name}...`;
+        item.textContent = `Uploading ${file.name}...`;
         uploadedList.appendChild(item);
 
         try {
           const result = await uploadFile(file);
           uploadedImages.push({ public_id: result.public_id, caption: '' });
-          item.textContent = `${file.name} - {% trans "uploaded" %}`;
+          item.textContent = `${file.name} - uploaded`;
         } catch (error) {
-          item.textContent = `${file.name} - {% trans "error" %}: ${error.message}`;
+          item.textContent = `${file.name} - error: ${error.message}`;
           item.style.color = '#b00';
           appendMessage(`${file.name}: ${error.message}`, true);
         }
@@ -126,19 +168,19 @@
 
       if (uploadedImages.length > 0) {
         saveButton.disabled = false;
-        appendMessage(`{% trans "Uploaded" %} ${uploadedImages.length} {% trans "images." %}`);
+        appendMessage(`Uploaded ${uploadedImages.length} images.`);
       }
       uploadButton.disabled = false;
     });
 
     saveButton.addEventListener('click', async () => {
       if (!uploadedImages.length) {
-        appendMessage('{% trans "No uploaded images available." %}', true);
+        appendMessage('No uploaded images available.', true);
         return;
       }
 
       saveButton.disabled = true;
-      appendMessage('{% trans "Saving images to post..." %}');
+      appendMessage('Saving images to post...');
 
       const csrftoken = getCookie('csrftoken');
       const response = await fetch(saveUrl, {
@@ -152,12 +194,12 @@
       });
       const data = await response.json();
       if (!response.ok || !data.ok) {
-        appendMessage(data.error || '{% trans "Save failed." %}', true);
+        appendMessage(data.error || 'Save failed.', true);
         saveButton.disabled = false;
         return;
       }
 
-      appendMessage(`{% trans "Successfully saved" %} ${data.created} {% trans "images." %}`);
+      appendMessage(`Successfully saved ${data.created} images.`);
       window.location.href = postAdminUrl;
     });
   </script>
