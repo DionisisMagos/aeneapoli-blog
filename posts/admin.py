@@ -14,10 +14,14 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 0  # Απενεργοποιήθηκε για να αποφευχθεί το payload limit
+    extra = 0
     max_num = 30
     fields = ('image', 'caption')
-    readonly_fields = ('image',)  # Μόνο για προβολή, όχι για edit
+    readonly_fields = ('image', 'caption')  # Εντελώς read-only
+    can_delete = False  # Δεν μπορεί να διαγράψει
+    
+    def has_add_permission(self, request, obj=None):
+        return False  # Δεν μπορεί να προσθέσει inline
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
