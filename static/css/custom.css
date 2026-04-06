@@ -95,3 +95,42 @@
   box-shadow:0 10px 30px rgba(0,0,0,0.10);
   margin-top:16px;
 }
+
+/* Gallery grid */
+.post-gallery{
+  margin-top:2rem;
+}
+
+.gallery-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(200px, 1fr));
+  gap:1rem;
+  margin-top:1rem;
+}
+
+.gallery-grid figure{
+  margin:0;
+  overflow:hidden;
+  border-radius:8px;
+  background:#f0f0f0;
+}
+
+.gallery-grid img{
+  width:100%;
+  height:200px;
+  object-fit:cover;
+  display:block;
+  transition:transform 0.3s ease;
+}
+
+.gallery-grid figure:hover img{
+  transform:scale(1.05);
+}
+
+.gallery-grid figcaption{
+  padding:0.5rem;
+  font-size:0.85rem;
+  color:#666;
+  background:#fafafa;
+  text-align:center;
+}
