@@ -12,24 +12,27 @@ from cloudinary.utils import api_sign_request
 
 from .models import Post, Category, PostImage
 
-class PostImageInline(admin.TabularInline):
+class PostImageInline(admin.StackedInline):
     model = PostImage
     extra = 20
     max_num = 30
     fields = ('image', 'caption')
-    readonly_fields = ('image', 'caption')
+    readonly_fields = ('image_preview', 'caption')
     can_delete = False
     can_add = False
     show_change_link = False
-    template = 'admin/posts/post/postimage_inline.html'  # Custom template
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return f'<img src="{obj.image.url}" style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 8px;">'
+        return '---'
+    image_preview.short_description = 'Εικόνα'
+    image_preview.allow_tags = True
     
     def has_add_permission(self, request, obj=None):
         return False
     
     def has_delete_permission(self, request, obj=None):
-        return False
-    
-    def has_change_permission(self, request, obj=None):
         return False
 
 @admin.register(Post)
