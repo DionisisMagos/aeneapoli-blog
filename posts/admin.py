@@ -95,7 +95,7 @@ class PostAdmin(admin.ModelAdmin):
         cloud_name = cloudinary_config().cloud_name
         return render(
             request,
-            'admin/posts/post/upload_images.html',
+            'admin/posts/post/upload_slots.html',
             {
                 'post': post,
                 'cloudinary_cloud_name': cloud_name,

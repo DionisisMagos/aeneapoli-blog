@@ -1,0 +1,201 @@
+{% load static %}
+
+<style>
+.cloudinary-slots-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f9f9f9;
+  border-radius: 8px;
+}
+
+.slot {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.slot:hover {
+  border-color: #f97316;
+  background: #fef5f0;
+}
+
+.slot input[type="file"] {
+  display: none;
+}
+
+.slot.uploaded {
+  border-color: #4caf50;
+  background: #f1f8f4;
+}
+
+.slot.uploaded img {
+  max-width: 100%;
+  max-height: 120px;
+  border-radius: 4px;
+}
+
+.slot.uploading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.slot .status {
+  font-size: 0.8em;
+  color: #666;
+  margin-top: 0.5rem;
+}
+</style>
+
+<div class="cloudinary-slots-container" id="cloudinary-slots">
+  <!-- Slots θα δημιουργηθούν από το JS -->
+</div>
+
+<div id="upload-messages" style="margin: 1rem 0; padding: 1rem; background: #f0f0f0; border-radius: 8px; display: none;"></div>
+
+<button type="button" id="upload-all-btn" class="default" style="margin: 1rem 0;">Ανέβασμα όλων</button>
+
+<script>
+(function() {
+  const TOTAL_SLOTS = 20;
+  const cloudName = '{{ cloudinary_cloud_name }}';
+  const uploadedFiles = {};
+  let uploadCount = 0;
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  async function getSignature() {
+    const csrftoken = getCookie('csrftoken');
+    const response = await fetch('{{ signature_url }}', { credentials: 'same-origin' });
+    return response.json();
+  }
+
+  async function uploadToCloudinary(file, slotIndex) {
+    const signData = await getSignature();
+    if (!signData.ok) {
+      throw new Error(signData.error || 'Signature error');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('api_key', signData.api_key);
+    formData.append('timestamp', signData.timestamp);
+    formData.append('signature', signData.signature);
+    formData.append('folder', 'aeneapoli/gallery');
+
+    const endpoint = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    const res = await fetch(endpoint, { method: 'POST', body: formData });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body.error?.message || 'Upload failed');
+    }
+    return res.json();
+  }
+
+  function initSlots() {
+    const container = document.getElementById('cloudinary-slots');
+    for (let i = 0; i < TOTAL_SLOTS; i++) {
+      const slot = document.createElement('div');
+      slot.className = 'slot';
+      slot.id = `slot-${i}`;
+      slot.innerHTML = `
+        <input type="file" accept="image/*" class="file-input">
+        <div class="content">
+          <span class="icon">📁</span>
+          <div class="status">Κάνε κλικ</div>
+        </div>
+      `;
+      
+      const fileInput = slot.querySelector('.file-input');
+      slot.addEventListener('click', () => fileInput.click());
+      
+      fileInput.addEventListener('change', async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        slot.classList.add('uploading');
+        slot.querySelector('.status').textContent = 'Ανέβασμα...';
+        
+        try {
+          const result = await uploadToCloudinary(file, i);
+          uploadedFiles[i] = result.public_id;
+          uploadCount++;
+          
+          slot.classList.remove('uploading');
+          slot.classList.add('uploaded');
+          slot.innerHTML = `
+            <img src="${result.secure_url}" alt="Εικόνα">
+            <div class="status">✓ Ανέβηκε</div>
+          `;
+        } catch (error) {
+          slot.classList.remove('uploading');
+          slot.querySelector('.status').textContent = `Σφάλμα: ${error.message}`;
+        }
+      });
+      
+      container.appendChild(slot);
+    }
+  }
+
+  document.getElementById('upload-all-btn').addEventListener('click', async () => {
+    if (uploadCount === 0) {
+      alert('Δεν έχεις ανεβάσει καμιά εικόνα!');
+      return;
+    }
+
+    const messagesDiv = document.getElementById('upload-messages');
+    messagesDiv.style.display = 'block';
+    messagesDiv.innerHTML = `<p style="color: #0066cc;">Αποθήκευση ${uploadCount} εικόνων...</p>`;
+
+    const csrftoken = getCookie('csrftoken');
+    const images = Object.values(uploadedFiles);
+
+    try {
+      const response = await fetch('{{ save_url }}', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken,
+        },
+        body: JSON.stringify({ images: images.map(id => ({ public_id: id, caption: '' })) }),
+        credentials: 'same-origin',
+      });
+
+      const data = await response.json();
+      if (data.ok) {
+        messagesDiv.innerHTML = `<p style="color: #4caf50;">✓ Αποθηκεύτηκαν ${data.created} εικόνες!</p>`;
+        setTimeout(() => {
+          window.location.href = '{{ post_admin_url }}';
+        }, 1500);
+      } else {
+        messagesDiv.innerHTML = `<p style="color: #d32f2f;">Σφάλμα: ${data.error}</p>`;
+      }
+    } catch (error) {
+      messagesDiv.innerHTML = `<p style="color: #d32f2f;">Σφάλμα: ${error.message}</p>`;
+    }
+  });
+
+  initSlots();
+})();
+</script>
