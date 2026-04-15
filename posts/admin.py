@@ -2,6 +2,7 @@ import json
 import time
 
 from django.contrib import admin
+from django import forms
 from django.conf import settings
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
@@ -12,27 +13,12 @@ from cloudinary.utils import api_sign_request
 
 from .models import Post, Category, PostImage
 
-class PostImageInline(admin.StackedInline):
+class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 0  # Χωρίς κενά slots - μόνο υπάρχουσες εικόνες
+    extra = 20
     max_num = 30
-    fields = ('image_preview', 'caption')
-    readonly_fields = ('image_preview', 'caption')
-    can_delete = False
-    can_add = False
-    
-    def image_preview(self, obj):
-        if obj.image:
-            return f'<img src="{obj.image.url}" style="max-width: 300px; max-height: 200px; object-fit: cover; border-radius: 8px;">'
-        return '---'
-    image_preview.short_description = 'Εικόνα'
-    image_preview.allow_tags = True
-    
-    def has_add_permission(self, request, obj=None):
-        return False
-    
-    def has_delete_permission(self, request, obj=None):
-        return False
+    fields = ('image', 'caption')
+    can_delete = True
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
