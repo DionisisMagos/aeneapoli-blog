@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
-from django.urls import path
+from django.urls import path, reverse
 
 from cloudinary import config as cloudinary_config
 from cloudinary.utils import api_sign_request
