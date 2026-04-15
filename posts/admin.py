@@ -14,14 +14,23 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 0
+    extra = 20
     max_num = 30
     fields = ('image', 'caption')
-    readonly_fields = ('image', 'caption')  # Εντελώς read-only
-    can_delete = False  # Δεν μπορεί να διαγράψει
+    readonly_fields = ('image', 'caption')
+    can_delete = False
+    can_add = False
+    show_change_link = False
+    template = 'admin/posts/post/postimage_inline.html'  # Custom template
     
     def has_add_permission(self, request, obj=None):
-        return False  # Δεν μπορεί να προσθέσει inline
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+    
+    def has_change_permission(self, request, obj=None):
+        return False
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
@@ -29,7 +38,7 @@ class PostAdmin(admin.ModelAdmin):
     list_filter = ('published', 'categories', 'created')
     search_fields = ('title', 'excerpt', 'content')
     prepopulated_fields = {'slug': ('title',)}
-    inlines = ()  # Κανένα inline - όλα γίνονται στο Upload images
+    inlines = (PostImageInline,)  # Ξαναενεργοποίηση inline για τα 20 slots
     change_form_template = 'admin/posts/post/change_form.html'
 
     def get_urls(self):
