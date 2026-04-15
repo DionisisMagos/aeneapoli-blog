@@ -5,7 +5,7 @@ from django.contrib import admin
 from django.utils.html import format_html
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
-from django.urls import path, reverse
+from django.urls import path
 
 from cloudinary import config as cloudinary_config
 from cloudinary.utils import api_sign_request
@@ -65,13 +65,6 @@ class PostAdmin(admin.ModelAdmin):
             ),
         ]
         return custom_urls + urls
-
-    def change_view(self, request, object_id, form_url='', extra_context=None):
-        extra_context = extra_context or {}
-        extra_context['upload_images_url'] = reverse(
-            'admin:posts_post_upload_images', args=[object_id]
-        )
-        return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
     def upload_images_view(self, request, object_id):
         post = get_object_or_404(Post, pk=object_id)
