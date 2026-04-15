@@ -13,7 +13,6 @@
           <div class="postimage-slot" data-image-id="{{ form.instance.pk }}">
             <div style="position: relative; border-radius: 8px; overflow: hidden; background: #f0f0f0;">
               <img src="{{ form.instance.image.url }}" style="width: 100%; height: 150px; object-fit: cover; display: block;">
-              <button type="button" class="delete-slot-btn" data-image-id="{{ form.instance.pk }}" style="position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; font-size: 18px; padding: 0;">×</button>
             </div>
             {% if form.instance.caption %}
               <div style="padding: 0.5rem; font-size: 0.85rem; color: #666; background: #fafafa; text-align: center;">{{ form.instance.caption }}</div>
@@ -33,46 +32,7 @@
     </div>
 
     <div style="margin-top: 1rem; text-align: center;">
-      <a href="{% url 'admin:posts_post_upload_images' original.pk %}" class="button default" style="padding: 0.5rem 1rem;">{% trans "Upload images" %}</a>
+      <a href="{% url 'admin:posts_post_upload_images' object_id %}" class="button default" style="padding: 0.5rem 1rem;">{% trans "Upload images" %}</a>
     </div>
   </fieldset>
 </div>
-
-<script>
-(function($) {
-  $(document).ready(function() {
-    // Delete image functionality
-    $('.delete-slot-btn').on('click', function(e) {
-      e.preventDefault();
-      if (!confirm('{% trans "Διαγραφή εικόνας;" %}')) return;
-      
-      const imageId = $(this).data('image-id');
-      const $slot = $(this).closest('.postimage-slot');
-      
-      // AJAX delete
-      $.ajax({
-        url: '{% url "admin:posts_post_delete_image" original.pk %}',
-        type: 'POST',
-        data: JSON.stringify({ image_id: imageId }),
-        contentType: 'application/json',
-        headers: {
-          'X-CSRFToken': $('input[name=csrfmiddlewaretoken]').val()
-        },
-        success: function(data) {
-          if (data.ok) {
-            $slot.remove();
-            // Add empty slot back
-            const $emptySlot = $('<div class="postimage-slot empty-slot" style="border: 2px dashed #ccc; border-radius: 8px; height: 150px; display: flex; align-items: center; justify-content: center; background: #fafafa; color: #999;"><span>{% trans "Κενή θέση" %}</span></div>');
-            $('#postimage-slots').append($emptySlot);
-          } else {
-            alert(data.error || '{% trans "Σφάλμα διαγραφής" %}');
-          }
-        },
-        error: function() {
-          alert('{% trans "Σφάλμα διαγραφής" %}');
-        }
-      });
-    });
-  });
-})(django.jQuery);
-</script>
