@@ -15,10 +15,24 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 20
+    extra = 0  # Μόνο υπάρχουσες εικόνες
     max_num = 30
-    fields = ('image', 'caption')
-    can_delete = True
+    fields = ('image_preview', 'caption')
+    readonly_fields = ('image_preview', 'caption')
+    can_delete = False
+    
+    def image_preview(self, obj):
+        if obj.image:
+            return f'<img src="{obj.image.url}" style="max-width: 120px; max-height: 100px; object-fit: cover; border-radius: 4px;">'
+        return '---'
+    image_preview.short_description = 'Preview'
+    image_preview.allow_tags = True
+    
+    def has_add_permission(self, request, obj=None):
+        return False
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
