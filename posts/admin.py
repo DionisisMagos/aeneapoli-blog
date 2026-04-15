@@ -19,6 +19,7 @@ class PostImageInline(admin.TabularInline):
     fields = ('image_preview', 'caption')
     readonly_fields = ('image_preview', 'caption')
     can_delete = False
+    template = 'admin/posts/post/postimage_inline_slots.html'
 
     def get_formset(self, request, obj=None, **kwargs):
         # Keep reference to parent post so empty rows can link to upload page.
@@ -30,13 +31,6 @@ class PostImageInline(admin.TabularInline):
             return format_html(
                 '<img src="{}" style="max-width: 120px; max-height: 100px; object-fit: cover; border-radius: 4px;">',
                 obj.image.url,
-            )
-        parent_obj = getattr(self, '_parent_obj', None)
-        if parent_obj and parent_obj.pk:
-            upload_url = reverse('admin:posts_post_upload_images', args=[parent_obj.pk])
-            return format_html(
-                '<a href="{}" class="button" style="padding:4px 8px;">Κενή θέση - Πάτα για upload</a>',
-                upload_url,
             )
         return 'Κενή θέση'
     image_preview.short_description = 'Preview'
