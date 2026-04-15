@@ -2,8 +2,7 @@ import json
 import time
 
 from django.contrib import admin
-from django import forms
-from django.conf import settings
+from django.utils.html import format_html
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, render
 from django.urls import path, reverse
@@ -15,21 +14,24 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 0  # Μόνο υπάρχουσες εικόνες
+    extra = 20  # 20 ορατές θέσεις στο admin
     max_num = 30
     fields = ('image_preview', 'caption')
     readonly_fields = ('image_preview', 'caption')
     can_delete = False
     
     def image_preview(self, obj):
-        if obj.image:
-            return f'<img src="{obj.image.url}" style="max-width: 120px; max-height: 100px; object-fit: cover; border-radius: 4px;">'
-        return '---'
+        if obj and obj.pk and obj.image:
+            return format_html(
+                '<img src="{}" style="max-width: 120px; max-height: 100px; object-fit: cover; border-radius: 4px;">',
+                obj.image.url,
+            )
+        return 'Κενή θέση'
     image_preview.short_description = 'Preview'
     image_preview.allow_tags = True
     
     def has_add_permission(self, request, obj=None):
-        return False
+        return True
     
     def has_delete_permission(self, request, obj=None):
         return False
