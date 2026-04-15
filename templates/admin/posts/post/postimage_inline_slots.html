@@ -30,15 +30,24 @@
 
 <script>
 (function() {
-  // Extract the post ID from the current URL (e.g., /admin/posts/post/123/change/ -> 123)
-  const postId = window.location.pathname.match(/\/posts\/post\/(\d+)\/change\//)?.[1];
+  // Extract the post ID from the current URL
+  // URLs can be: /admin/posts/post/123/change/ or /posts/post/123/change/
+  const match = window.location.pathname.match(/posts\/post\/(\d+)\/change\//);
+  const postId = match ? match[1] : null;
   
   if (postId) {
     // Set all upload-slot buttons to point to the upload page
     const uploadUrl = `/admin/posts/post/${postId}/upload-images/`;
+    console.log('Setting upload URL:', uploadUrl); // Debug log
     document.querySelectorAll('.upload-slot-btn').forEach(btn => {
       btn.href = uploadUrl;
+      btn.onclick = function(e) {
+        e.preventDefault(); // Prevent default link behavior
+        window.location.href = uploadUrl; // Navigate to upload page
+      };
     });
+  } else {
+    console.warn('Could not extract post ID from URL:', window.location.pathname);
   }
 })();
 </script>
