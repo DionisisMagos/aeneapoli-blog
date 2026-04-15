@@ -14,21 +14,11 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.TabularInline):
     model = PostImage
-    extra = 20  # 20 ορατές θέσεις στο admin
+    extra = 0  # Δεν δείχνουμε κενές γραμμές - θα χρησιμοποιούμε το κουμπί upload
     max_num = 30
     fields = ('image_preview', 'caption')
     readonly_fields = ('image_preview', 'caption')
-    can_delete = False
-    template = 'admin/posts/post/postimage_inline_slots.html'
-
-    def get_formset(self, request, obj=None, **kwargs):
-        # Pass the upload URL to the formset so the template can access it
-        formset_class = super().get_formset(request, obj, **kwargs)
-        if obj:
-            formset_class.upload_images_url = reverse(
-                'admin:posts_post_upload_images', args=[obj.pk]
-            )
-        return formset_class
+    can_delete = True
     
     def image_preview(self, obj):
         if obj and obj.pk and obj.image:
