@@ -14,17 +14,16 @@ from .models import Post, Category, PostImage
 
 class PostImageInline(admin.StackedInline):
     model = PostImage
-    extra = 20
+    extra = 0  # Χωρίς κενά slots - μόνο υπάρχουσες εικόνες
     max_num = 30
-    fields = ('image', 'caption')
+    fields = ('image_preview', 'caption')
     readonly_fields = ('image_preview', 'caption')
     can_delete = False
     can_add = False
-    show_change_link = False
     
     def image_preview(self, obj):
         if obj.image:
-            return f'<img src="{obj.image.url}" style="max-width: 200px; max-height: 150px; object-fit: cover; border-radius: 8px;">'
+            return f'<img src="{obj.image.url}" style="max-width: 300px; max-height: 200px; object-fit: cover; border-radius: 8px;">'
         return '---'
     image_preview.short_description = 'Εικόνα'
     image_preview.allow_tags = True
